@@ -3,17 +3,17 @@ name: pay-for-service
 description: Make a paid API request to an x402 endpoint with automatic USDC payment. Use when you or the user want to call a paid API, make an x402 request, use a paid service, or pay for an API call. Use after finding a service with search-for-service.
 user-invocable: true
 disable-model-invocation: false
-allowed-tools: ["Bash(npx awal@latest status*)", "Bash(npx awal@latest balance*)", "Bash(npx awal@latest x402 pay *)"]
+allowed-tools: ["Bash(npx awal@2.0.3 status*)", "Bash(npx awal@2.0.3 balance*)", "Bash(npx awal@2.0.3 x402 pay *)"]
 ---
 
 # Making Paid x402 Requests
 
-Use the `npx awal@latest x402 pay` command to call paid API endpoints with automatic USDC payment on Base.
+Use the `npx awal@2.0.3 x402 pay` command to call paid API endpoints with automatic USDC payment on Base.
 
 ## Confirm wallet is initialized and authed
 
 ```bash
-npx awal@latest status
+npx awal@2.0.3 status
 ```
 
 If the wallet is not authenticated, refer to the `authenticate-wallet` skill.
@@ -21,7 +21,7 @@ If the wallet is not authenticated, refer to the `authenticate-wallet` skill.
 ## Command Syntax
 
 ```bash
-npx awal@latest x402 pay <url> [-X <method>] [-d <json>] [-q <params>] [-h <json>] [--max-amount <n>] [--json]
+npx awal@2.0.3 x402 pay <url> [-X <method>] [-d <json>] [-q <params>] [-h <json>] [--max-amount <n>] [--json]
 ```
 
 ## Options
@@ -49,23 +49,33 @@ X402 uses USDC atomic units (6 decimals):
 
 **IMPORTANT**: Always single-quote amounts that use `$` to prevent bash variable expansion (e.g. `'$1.00'` not `$1.00`).
 
+## Input Validation
+
+Before constructing the command, validate all user-provided values to prevent shell injection:
+
+- **url**: Must be a valid URL starting with `https://` or `http://`. Reject if it contains spaces, semicolons, pipes, backticks, or shell metacharacters.
+- **data (-d)**: Must be valid JSON. Always wrap in single quotes to prevent shell expansion.
+- **max-amount**: Must be a positive integer (`^\d+$`).
+
+Do not pass unvalidated user input into the command.
+
 ## Examples
 
 ```bash
 # Make a GET request (auto-pays)
-npx awal@latest x402 pay https://example.com/api/weather
+npx awal@2.0.3 x402 pay https://example.com/api/weather
 
 # Make a POST request with body
-npx awal@latest x402 pay https://example.com/api/sentiment -X POST -d '{"text": "I love this product"}'
+npx awal@2.0.3 x402 pay https://example.com/api/sentiment -X POST -d '{"text": "I love this product"}'
 
 # Limit max payment to $0.10
-npx awal@latest x402 pay https://example.com/api/data --max-amount 100000
+npx awal@2.0.3 x402 pay https://example.com/api/data --max-amount 100000
 ```
 
 ## Prerequisites
 
-- Must be authenticated (`npx awal@latest status` to check, see `authenticate-wallet` skill)
-- Wallet must have sufficient USDC balance (`npx awal@latest balance` to check)
+- Must be authenticated (`npx awal@2.0.3 status` to check, see `authenticate-wallet` skill)
+- Wallet must have sufficient USDC balance (`npx awal@2.0.3 balance` to check)
 - If you don't know the endpoint URL, use the `search-for-service` skill to find services first
 
 ## Error Handling
